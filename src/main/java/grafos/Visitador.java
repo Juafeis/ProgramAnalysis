@@ -2,8 +2,10 @@ package grafos;
 	
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -50,6 +52,34 @@ public class Visitador extends VoidVisitorAdapter<CFG>
 		// Seguimos visitando...
 		super.visit(es, cfg);
 	}
+	
+	// Visitador de ifs
+	// Cada if encontrado genera nodos en el CFG	
+	@Override
+	public void visit(IfStmt es, CFG cfg)
+	{
+		// Creamos el nodo actual
+		nodoActual = crearNodo("if " + es.getCondition()); 
+				
+		crearArcos(cfg);
+		
+		nodoAnterior = nodoActual;
+		
+		// Seguimos visitando...
+		es.getThenStmt().accept(this, cfg);
+		
+		if(es.getElseStmt().isPresent()) {
+			es.getElseStmt().get().accept(this, cfg);;
+		}
+		
+		
+		
+		
+	}
+	
+	
+
+		
 	
 	// Añade un arco desde el último nodo hasta el nodo actual (se le pasa como parametro)
 	private void añadirArcoSecuencialCFG(CFG cfg)
