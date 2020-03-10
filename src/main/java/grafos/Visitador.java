@@ -1,7 +1,5 @@
 package grafos;
 	
-import java.util.List;
-
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -10,7 +8,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 
-public class Visitador extends VoidVisitorAdapter<CFG cfg>
+public class Visitador extends VoidVisitorAdapter<CFG>
 {	
 	/********************************************************/
 	/********************** Atributos ***********************/
@@ -34,7 +32,7 @@ public class Visitador extends VoidVisitorAdapter<CFG cfg>
 		super.visit(methodDeclaration, cfg);
 		
 		// Añadimos el nodo final al CFG
-		collector.add(nodoAnterior+"-> Stop;");
+		cfg.arcos.add(nodoAnterior+"-> Stop;");
 	}
 	
 	// Visitador de expresiones
