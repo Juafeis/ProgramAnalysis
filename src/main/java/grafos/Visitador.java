@@ -45,7 +45,7 @@ public class Visitador extends VoidVisitorAdapter<CFG>
 		// Creamos el nodo actual
 		nodoActual = crearNodo(es); 
 				
-		crearArcos(cfg);
+		añadirArco(cfg);
 				
 		nodoAnterior = nodoActual;
 		
@@ -60,29 +60,25 @@ public class Visitador extends VoidVisitorAdapter<CFG>
 	{
 		// Creamos el nodo actual
 		nodoActual = crearNodo("if " + es.getCondition()); 
-				
-		crearArcos(cfg);
-		
 		nodoAnterior = nodoActual;
 		
-		// Seguimos visitando...
-		es.getThenStmt().accept(this, cfg);
+		String nodoThen = crearNodo("then " + es.getThenStmt());
+		String nodoElse = "";
 		
+		es.getThenStmt().accept(this, cfg);
 		if(es.getElseStmt().isPresent()) {
-			es.getElseStmt().get().accept(this, cfg);;
+			es.getElseStmt().get().accept(this, cfg);
+			nodoElse = crearNodo("else " + es.getElseStmt());
 		}
 		
-		
-		
+		añadirArco(cfg,es, nodoThen, nodoElse);
+		// Seguimos visitando...
+		super.visit(es, cfg);
 		
 	}
 	
-	
-
-		
-	
-	// Añade un arco desde el último nodo hasta el nodo actual (se le pasa como parametro)
-	private void añadirArcoSecuencialCFG(CFG cfg)
+	// Crear Arco Secuencial
+	private void añadirArco(CFG cfg)
 	{
 		System.out.println("NODO: " + nodoActual);
 		
@@ -90,11 +86,23 @@ public class Visitador extends VoidVisitorAdapter<CFG>
 		cfg.arcos.add(arco);
 	}
 	
-	// Crear arcos
-	private void crearArcos(CFG cfg)
+	// Crear Arco IF
+	private void añadirArco(CFG cfg, IfStmt es, String nodoThen, String nodoElse)
 	{
-			añadirArcoSecuencialCFG(cfg);
+		System.out.println("NODO: " + nodoActual);
+		
+		String arco = nodoAnterior + "->" + nodoThen + ";";
+		cfg.arcos.add(arco);
+		cfg.nodos_control.add(es.getCondition().toString());
+		cfg.tipo_nodos_control.add("if");
+		
+		if(!nodoElse.equals("")) {
+			String arcoElse = nodoAnterior + "->" + nodoElse + ";";
+			cfg.arcos.add(arcoElse);
+		}
 	}
+	
+
 
 	// Crear nodo
 	// Añade un arco desde el nodo actual hasta el último control
