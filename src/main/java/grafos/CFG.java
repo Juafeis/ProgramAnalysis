@@ -10,5 +10,7 @@ public class CFG {
 	List<String> nodos_control = new ArrayList<String>();
 	
 	List<String> tipo_nodos_control = new ArrayList<String>();
+	
+	List<List<String>> nodos_in_nodos_control = new ArrayList<List<String>>();
 
 }

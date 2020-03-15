@@ -13,7 +13,7 @@ public class Transformador {
 
 	public static void main(String[] args) throws Exception {
 		// Ruta del fichero con el programa que vamos a transformar
-		String ruta = "./src/main/java/ejemplos/Test_3";
+		String ruta = "./src/main/java/ejemplos/Test_5";
 		
 		// Abrimos el fichero original (un ".java")
 		File original = new File(ruta + ".java");

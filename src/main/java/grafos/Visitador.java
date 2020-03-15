@@ -1,5 +1,10 @@
 package grafos;
 	
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.AssertStmt;
@@ -20,6 +25,8 @@ public class Visitador extends VoidVisitorAdapter<CFG>
 	int contador=1;
 	String nodoAnterior = "Start";
 	String nodoActual = "";
+	String nodoIf = "";
+	boolean ifActivo = false;
 	
 	/********************************************************/
 	/*********************** Metodos ************************/
@@ -46,7 +53,34 @@ public class Visitador extends VoidVisitorAdapter<CFG>
 		nodoActual = crearNodo(es); 
 				
 		añadirArco(cfg);
-				
+		
+		
+		
+		//System.out.println(cfg.nodos_control);
+		
+		
+		if(cfg.nodos_in_nodos_control.size()>0) {
+			//System.out.println(cfg.nodos_in_nodos_control.get(cfg.nodos_in_nodos_control.size()-1).size());
+			if(cfg.nodos_in_nodos_control.get(cfg.nodos_in_nodos_control.size()-1).size()>0) {
+				cfg.nodos_in_nodos_control.get(cfg.nodos_in_nodos_control.size()-1).remove(0);
+			}
+			else {
+				for(int i = cfg.nodos_in_nodos_control.size()-1; i >= 0 ; i--) {
+					System.out.println(cfg.nodos_control);
+					System.out.println(cfg.nodos_in_nodos_control);
+					if(cfg.nodos_in_nodos_control.get(i).size()==0) {
+						System.out.println("nodo actual " + nodoActual);
+						añadirArco(cfg, cfg.nodos_control.get(i));
+						cfg.nodos_in_nodos_control.get(i).remove(0);
+						cfg.nodos_in_nodos_control.remove(i);
+						cfg.nodos_control.remove(i);
+						
+					}
+				}
+
+			}
+			
+		}
 		nodoAnterior = nodoActual;
 		
 		// Seguimos visitando...
@@ -60,21 +94,40 @@ public class Visitador extends VoidVisitorAdapter<CFG>
 	{
 		// Creamos el nodo actual
 		nodoActual = crearNodo("if " + es.getCondition()); 
+		
+		cfg.nodos_control.add(nodoActual);
+		cfg.tipo_nodos_control.add("if");
+		
+		añadirArco(cfg);
+		
 		nodoAnterior = nodoActual;
 		
-		String nodoThen = crearNodo("then " + es.getThenStmt());
-		String nodoElse = "";
+		List<String> nodos = new ArrayList<String>();
+		for (Node child : es.getThenStmt().getChildNodes()) {
+			if(child instanceof IfStmt) {
+				System.out.println("NO Añado hijo: " + child.toString());
+				}
+			else {
+				System.out.println("Añado hijo: " + child.toString());
+				nodos.add(child.toString());
+			}
+				
+				
+		}
+		System.out.println(nodos);
+		cfg.nodos_in_nodos_control.add(nodos);
 		
 		es.getThenStmt().accept(this, cfg);
 		if(es.getElseStmt().isPresent()) {
 			es.getElseStmt().get().accept(this, cfg);
-			nodoElse = crearNodo("else " + es.getElseStmt());
+			//nodoElse = crearNodo("else " + es.getElseStmt());
 		}
 		
-		añadirArco(cfg,es, nodoThen, nodoElse);
+		//añadirArco(cfg, nodoAnterior);
 		// Seguimos visitando...
-		super.visit(es, cfg);
+		//super.visit((AssertStmt) es.getThenStmt(), cfg);
 		
+
 	}
 	
 	// Crear Arco Secuencial
@@ -87,19 +140,15 @@ public class Visitador extends VoidVisitorAdapter<CFG>
 	}
 	
 	// Crear Arco IF
-	private void añadirArco(CFG cfg, IfStmt es, String nodoThen, String nodoElse)
+	private void añadirArco(CFG cfg, String nodoIf)
 	{
 		System.out.println("NODO: " + nodoActual);
 		
-		String arco = nodoAnterior + "->" + nodoThen + ";";
+		String arco = nodoIf + "->" + nodoActual + ";";
 		cfg.arcos.add(arco);
-		cfg.nodos_control.add(es.getCondition().toString());
-		cfg.tipo_nodos_control.add("if");
 		
-		if(!nodoElse.equals("")) {
-			String arcoElse = nodoAnterior + "->" + nodoElse + ";";
-			cfg.arcos.add(arcoElse);
-		}
+		
+		
 	}
 	
 
